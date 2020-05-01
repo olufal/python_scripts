@@ -7,10 +7,10 @@ import pandas as pd
 from retrying import retry
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
-from hapydb.sf.database import SnowFlake
-from hapydb.sf.logger import Logger
-import hapydb.sf.config as db_config
-from hapydb.utils import utility as u
+from databases.snowflake.database import SnowFlake
+from databases.snowflake.logger import Logger
+import databases.snowflake.config as db_config
+from databases.utils import utility as u
 import argparse
 
 PARSER = argparse.ArgumentParser(
@@ -52,7 +52,7 @@ AL_ACCOUNT_SID = config['AL_ACCOUNT_SID']
 AL_AUTH_TOKEN = config['AL_AUTH_TOKEN']
 URL = 'https://api.twilio.com/2010-04-01/Accounts/{}/Usage/Records.json?StartDate={}&EndDate={}'
 LAST_MONTH_URL = 'https://api.twilio.com/2010-04-01/Accounts/{}/Usage/Records/LastMonth.json?'
-DATABASE = db_config.LANDING
+DATABASE = db_config.DATABASE
 SCHEMA = 'TWILIO'
 TABLE = 'TWILIO_USAGE'
 SF = SnowFlake(schema=SCHEMA)
