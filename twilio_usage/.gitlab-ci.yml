@@ -1,0 +1,58 @@
+stages:
+  - lint
+  - test_build
+  - package_prod
+
+lint:
+  stage: lint
+  script:
+    - python36 -m venv venv
+    - venv/bin/pip install --upgrade pip setuptools
+    - venv/bin/pip install pylint==2.4.2 pylint-exit==1.0.0
+    # Fail if any errors are detected by pylint. TODO: publish a cool badge in the README with coverage and lint score
+    - venv/bin/pylint --rcfile=pylintrc --output-format=text src || venv/bin/pylint-exit $?
+  tags:
+    - aws_build_node
+  only:
+    - merge_requests
+    - master
+
+test_build:
+  stage: test_build
+
+  script:
+    - python36 -m venv venv
+    - venv/bin/pip install --upgrade pip setuptools
+    - venv/bin/pip install pandas==0.25.1 requests==2.22.0
+    - venv/bin/python gitlab.py --project_id $CI_PROJECT_ID --commit_message $CI_COMMIT_MESSAGE --working_branch $CI_COMMIT_REF_NAME
+    - SEMANTIC_VERSION=$(<output.txt)
+    - echo $SEMANTIC_VERSION
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build --rm -t $CI_REGISTRY/data_engineering/$CI_PROJECT_NAME:test_build-$SEMANTIC_VERSION .
+#   We don't push test images since it can build additional storage layers
+#    - docker push $CI_REGISTRY/data_engineering/$CI_PROJECT_NAME:test_build-$SEMANTIC_VERSION
+  tags:
+    - aws_build_node
+  only:
+    - merge_requests
+
+package_prod:
+  stage: package_prod
+  script:
+    - python36 -m venv venv
+    - venv/bin/pip install --upgrade pip setuptools
+    - venv/bin/pip install pandas==0.25.1 requests==2.22.0
+    - venv/bin/python gitlab.py --project_id $CI_PROJECT_ID --commit_message $CI_COMMIT_MESSAGE --working_branch $CI_COMMIT_REF_NAME
+    - SEMANTIC_VERSION=$(<output.txt)
+    - echo $SEMANTIC_VERSION
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build  --rm -t $CI_REGISTRY/data_engineering/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$SEMANTIC_VERSION -t $CI_REGISTRY/data_engineering/$CI_PROJECT_NAME:latest .
+    - docker push $CI_REGISTRY/data_engineering/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME-$SEMANTIC_VERSION
+    - docker push $CI_REGISTRY/data_engineering/$CI_PROJECT_NAME:latest
+  tags:
+    - aws_build_node
+  only:
+    - master
+
+
+

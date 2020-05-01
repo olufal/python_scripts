@@ -1,0 +1,17 @@
+*.pyc
+*.idea
+*.log
+*.yaml
+*.json
+*.csv
+*.gitignore
+.gitlab-ci.yml
+pylintrc
+venv/
+SCRATCH_PAD/
+.vscode
+.DS_STORE
+.coverage
+downloads/
+logs/
+gitlab.py
