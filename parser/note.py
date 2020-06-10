@@ -6,7 +6,7 @@ import pandas as pd
 import os
 import numpy as np
 import re
-from tika import parser
+# from tika import parser
 from nltk.tokenize import sent_tokenize
 from dateutil.parser import parse
 from datetime import datetime, date
@@ -14,7 +14,7 @@ from datetime import datetime, date
 
 class CAMNotes:
     """
-        Loss cost class
+        CAM note class
     """
     def __init__(
             self,
@@ -43,7 +43,7 @@ class CAMNotes:
         self.opportunities = None
         self.personal_info = None
         self.next_steps = None
-        self.notes_df = pd.DataFrame()
+        self.note_df = pd.DataFrame()
         self.normalize_text()
 
     def normalize_text(self):
@@ -91,13 +91,8 @@ class CAMNotes:
         pattern = re.compile(r'[^a-zA-Z ]+')
         str = re.sub(pattern, '|', response_text)
         names = [name for name in str.split('| ') if len(name) > 0]
-        tokenized_names = [sent_tokenize(name) for name in names if len(name) > 0 and 'insert' not in name]
-        return tokenized_names
-
-    def remove_placeholder(self, text):
-        if text == '<< insert text here >>':
-            clean_text = text.replace()
-        return
+        # tokenized_names = [sent_tokenize(name) for name in names if len(name) > 0 and 'insert' not in name]
+        return names
 
     def generate(self):
         try:
@@ -124,13 +119,13 @@ class CAMNotes:
                                'next_steps': [self.next_steps]
                                }
                     df = pd.DataFrame(df_data)
-                    df['create_datetime'] = datetime.now()
-                    self.notes_df = self.notes_df.append(df, sort=False, ignore_index=True)
-                    self.notes_df = self.notes_df.replace('<< insert text here >>', np.nan)
+                    df['parse_datetime'] = datetime.now()
+                    self.note_df = self.note_df.append(df, sort=False, ignore_index=True)
+                    self.note_df = self.note_df.replace('<< insert text here >>', np.nan)
 
         except Exception as e:
             print(e)
         finally:
-            print(f'Process completed')
+            print(f'Process completed for note id: {self.note_id}')
         print()
 

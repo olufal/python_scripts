@@ -1,5 +1,5 @@
 import pandas as pd
-from strive.note import CAMNotes
+from data_engineering.parser.note import CAMNotes
 from datetime import date, datetime
 
 
@@ -11,13 +11,10 @@ NOTE = """| Date of Meeting (mm/dd/yyyy): 06/02/2020
 
 1. John Falope
 
-2.  Doug P.
+2. Doug Peterson
 
-3.  Maria Doe
+3. << insert text here >>
 
-4.  << insert text here >>
-
-5.  << insert text here >>
 
 
 
@@ -58,6 +55,10 @@ Got a feel of client expectation
 << insert text here >>
 """
 
-note = CAMNotes(note_text=NOTE, create_datetime=date.today(), action='Client')
+path = r'C:\out\test.csv'
+
+note = CAMNotes(note_id='16278623', note_text=NOTE, create_datetime=date.today(), action='Client')
 note.normalize_text()
 note.generate()
+
+# note.note_df.to_csv(path)
