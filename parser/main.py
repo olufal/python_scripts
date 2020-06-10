@@ -1,63 +1,38 @@
 import pandas as pd
 from data_engineering.parser.note import CAMNotes
-from datetime import date, datetime
+from azure.storage.blob import BlockBlobService
+from datetime import datetime
+
+# Define parameters
+storageAccountName = "<storage-account-name>"
+storageKey         = "<storage-account-key>"
+containerName      = "blobstorage"
+
+# Establish connection with the blob storage account
+blobService = BlockBlobService(account_name=storageAccountName,
+                               account_key=storageKey
+                               )
+
+def main(extract_file: str):
+    raw_data = pd.read_csv(extract_file)
+    parsed_df = pd.DataFrame()
+
+    for i, row in raw_data.iterrows():
+        note = CAMNotes(note_id=row['note_id'],
+                        note_text=row['note_text'],
+                        create_datetime=row['note_date'],
+                        action=row['note_action'])
+        note.generate()
+        parsed_df = parsed_df.append(note.note_df, ignore_index=True, sort=False)
+
+    now = datetime.now().strftime("%Y%m%d%H%M%S")
+    parsed_file = f'parsed_note_{now}.csv'
+    parsed_df.to_csv(parsed_file, index=False)
+
+    # Upload iris dataset
+    blobService.create_blob_from_text(containerName, parsed_file, parsed_file)
 
 
-NOTE = """| Date of Meeting (mm/dd/yyyy): 06/02/2020
-
-
-
-| CAM Attendees (FirstName LastName):
-
-1. John Falope
-
-2. Doug Peterson
-
-
-
-
-| Meeting Description (Lunch, coffee, drinks, meeting in office, etc.):
-
-Lunch
-
-
-
-| Purpose (Follow up meeting, first meeting, intro to Data & Analytics, etc.):
-
-First Meeting
-
-
-
-| Updates  (Please provide a recap of what was discussed):
-
-Got a feel of client expectation
-
-
-
-
-
-| Opportunities (Describe an opportunity uncovered, if any):
-None
-
-
-
-
-| Personal (Non-work related info - kids, family, hobbies, etc.):
-
-Not sure
-
-
-
-| Next steps (Send thank you note, touch base in a week, schedule lunch, etc.):
-
-<< insert text here >>
-"""
-
-path = r'C:\out\test.csv'
-
-note = CAMNotes(note_id='16278623', note_text=NOTE, create_datetime=date.today(), action='Client')
-note.normalize_text()
-note.generate()
-table_name = 'CAM_NOTE_DETAIL'
-schema = pd.io.sql.get_schema(note.note_df, table_name)
-# note.note_df.to_csv(path)
+if __name__ == '__main__':
+    file_path = r'C:\out\test.csv'
+    main(file_path)
