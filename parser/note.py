@@ -4,9 +4,8 @@ Author: John Falope
 
 import pandas as pd
 import os
-import numpy as np
 import re
-# from tika import parser
+import numpy as np
 from nltk.tokenize import sent_tokenize
 from dateutil.parser import parse
 from datetime import datetime, date
@@ -120,6 +119,7 @@ class CAMNotes:
                                }
                     df = pd.DataFrame(df_data)
                     df['parse_datetime'] = datetime.now()
+                    df.columns = df.columns.str.upper()
                     self.note_df = self.note_df.append(df, sort=False, ignore_index=True)
                     self.note_df = self.note_df.replace('<< insert text here >>', np.nan)
 
