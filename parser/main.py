@@ -60,5 +60,6 @@ path = r'C:\out\test.csv'
 note = CAMNotes(note_id='16278623', note_text=NOTE, create_datetime=date.today(), action='Client')
 note.normalize_text()
 note.generate()
-
+table_name = 'CAM_NOTES_DETAIL'
+schema = pd.io.sql.get_schema(note.note_df, table_name)
 # note.note_df.to_csv(path)

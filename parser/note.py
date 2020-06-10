@@ -110,7 +110,7 @@ class CAMNotes:
                 if len(attendee) > 0:
                     df_data = {'note_id': [self.note_id],
                                'meeting_date': [self.meeting_date],
-                               'attendees': [attendee],
+                               'attendee': [attendee],
                                'description': [self.description],
                                'purpose': [self.purpose],
                                'updates': [self.updates],
