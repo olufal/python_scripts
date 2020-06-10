@@ -4,6 +4,7 @@ Author: John Falope
 
 import pandas as pd
 import os
+import numpy as np
 import re
 from tika import parser
 from nltk.tokenize import sent_tokenize
@@ -17,6 +18,7 @@ class CAMNotes:
     """
     def __init__(
             self,
+            note_id: str,
             note_text: str,
             create_datetime: date,
             action: str
@@ -27,6 +29,7 @@ class CAMNotes:
             :param create_datetime:
             :param action:
         """
+        self.note_id = note_id
         self.note_text = note_text
         self.create_datetime = create_datetime
         self.action = action
@@ -40,6 +43,7 @@ class CAMNotes:
         self.opportunities = None
         self.personal_info = None
         self.next_steps = None
+        self.notes_df = pd.DataFrame()
         self.normalize_text()
 
     def normalize_text(self):
@@ -88,15 +92,17 @@ class CAMNotes:
         str = re.sub(pattern, '|', response_text)
         names = [name for name in str.split('| ') if len(name) > 0]
         tokenized_names = [sent_tokenize(name) for name in names if len(name) > 0 and 'insert' not in name]
-        return names
+        return tokenized_names
+
+    def remove_placeholder(self, text):
+        if text == '<< insert text here >>':
+            clean_text = text.replace()
+        return
 
     def generate(self):
         try:
             self.meeting_date = self.get_meeting_date()
-            print(f'Effective Date is {self.meeting_date}')
-
             self.attendees = self.get_attendees(self.responses[1])
-            print(self.attendees)
 
             self.description = self.responses[2]
             self.purpose = self.responses[3]
@@ -105,10 +111,26 @@ class CAMNotes:
             self.personal_info = self.responses[6]
             self.next_steps = self.responses[7]
 
+            for attendee in self.attendees:
+                if len(attendee) > 0:
+                    df_data = {'note_id': [self.note_id],
+                               'meeting_date': [self.meeting_date],
+                               'attendees': [attendee],
+                               'description': [self.description],
+                               'purpose': [self.purpose],
+                               'updates': [self.updates],
+                               'opportunities': [self.opportunities],
+                               'personal_info': [self.personal_info],
+                               'next_steps': [self.next_steps]
+                               }
+                    df = pd.DataFrame(df_data)
+                    df['create_datetime'] = datetime.now()
+                    self.notes_df = self.notes_df.append(df, sort=False, ignore_index=True)
+                    self.notes_df = self.notes_df.replace('<< insert text here >>', np.nan)
+
+        except Exception as e:
             print(e)
         finally:
             print(f'Process completed')
         print()
-
-
 
