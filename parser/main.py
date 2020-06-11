@@ -1,27 +1,43 @@
 import pandas as pd
-from data_engineering.parser.note import CAMNotes
+from strive.note import CAMNotes
 from azure.storage.blob import BlockBlobService
 from datetime import datetime
+import dask.dataframe as dd
 
 # Define parameters
-storageAccountName = "<storage-account-name>"
-storageKey         = "<storage-account-key>"
-containerName      = "blobstorage"
+storageAccountName = "devinternalanalyticssa"
+storageKey         = "V0asRZHya4Gutd4jQpmBvtw4l9bDKL5CiJs3c4d7qTtn0AJ60JiVQT4imW/hFNXRQSEYvK+9mKWme+jpIWC5mg=="
+containerName      = "blobstage"
+
 
 # Establish connection with the blob storage account
 blobService = BlockBlobService(account_name=storageAccountName,
                                account_key=storageKey
                                )
+batchAccount = 'deviabatch'
+batchURL = 'https://deviabatch.eastus.batch.azure.com'
+primaryAccessKey = '/MTRr7/uq9BfvO8mGVUMB1QhrymlfntGVyp+1z/idSitCJ6265xAjMlqV8V+axrQeblhlLRVlSLiPMqDpIm/zQ=='
+blobDirectory = 'bullhorn/python'
+
+def etl(input_file):
+    raw_data = pd.read_csv(input_file)
+    df = raw_data['comments']
+    now = datetime.now().strftime("%Y%m%d%H%M%S")
+    output_file = f'parsed_note_{now}.csv'
+    df.to_csv(output_file)
+    blobService.create_blob_from_text(containerName, output_file, output_file)
+
 
 def main(extract_file: str):
     raw_data = pd.read_csv(extract_file)
     parsed_df = pd.DataFrame()
 
     for i, row in raw_data.iterrows():
-        note = CAMNotes(note_id=row['note_id'],
-                        note_text=row['note_text'],
-                        create_datetime=row['note_date'],
-                        action=row['note_action'])
+        note = CAMNotes(note_id=row['noteid'],
+                        comments=row['comments'],
+                        person_id=row['commentingpersonid'],
+                        create_datetime=row['dateadded'],
+                        action=row['action'])
         note.generate()
         parsed_df = parsed_df.append(note.note_df, ignore_index=True, sort=False)
 
@@ -34,5 +50,8 @@ def main(extract_file: str):
 
 
 if __name__ == '__main__':
-    file_path = r'C:\out\test.csv'
-    main(file_path)
+    # file_path = r'C:\out\ClientMeetingNotes_test.csv'
+    # df = pd.read_csv(file_path, sep='\t')
+    # main(file_path)
+    input_file = 'ClientMeetingNotes.csv'
+    etl(input_file)
