@@ -18,18 +18,20 @@ class CAMNotes:
     def __init__(
             self,
             note_id: str,
-            note_text: str,
+            comments: str,
             create_datetime: date,
-            action: str
+            action: str,
+            person_id: str
     ):
         """
-            Constructor for a Loss Cost event
+            Constructor Bullhorn Note
             :param note_text:
             :param create_datetime:
             :param action:
         """
         self.note_id = note_id
-        self.note_text = note_text
+        self.person_id = person_id
+        self.comments = comments
         self.create_datetime = create_datetime
         self.action = action
         self.prompts = None
@@ -48,12 +50,11 @@ class CAMNotes:
     def normalize_text(self):
         """
         Used to parse the note into different prompts
-
         :param text:
         :return: list of answers
         """
 
-        prompts = self.note_text.split('|')
+        prompts = self.comments.split('|')
         self.prompts = [line.replace('\n', '') for line in prompts if
                    line.isspace() == False and line != '\n' and len(line) != 0]
         # prompts = [clean_text(line) for line in prompts]
@@ -68,7 +69,6 @@ class CAMNotes:
     def contains_date(self, string: str, fuzzy=True):
         """
         Return whether the string can be interpreted as a date.
-
         :param string: str, string to check for date
         :param fuzzy: bool, ignore unknown tokens in string if True
         """
@@ -109,6 +109,7 @@ class CAMNotes:
                 if len(attendee) > 0:
                     df_data = {'note_id': [self.note_id],
                                'meeting_date': [self.meeting_date],
+                               'person_id': [self.person_id],
                                'attendee': [attendee],
                                'description': [self.description],
                                'purpose': [self.purpose],
@@ -128,4 +129,3 @@ class CAMNotes:
         finally:
             print(f'Process completed for note id: {self.note_id}')
         print()
-
