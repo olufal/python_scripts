@@ -19,7 +19,7 @@ class CAMNotes:
             self,
             note_id: str,
             comments: str,
-            create_datetime: date,
+            cam_datetime: date,
             action: str,
             person_id: str
     ):
@@ -32,11 +32,11 @@ class CAMNotes:
         self.note_id = note_id
         self.person_id = person_id
         self.comments = comments
-        self.create_datetime = create_datetime
+        self.cam_datetime = cam_datetime
         self.action = action
         self.prompts = None
         self.responses = None
-        self.meeting_date = None
+        self.note_date = None
         self.attendees = []
         self.description = None
         self.purpose = None
@@ -78,7 +78,7 @@ class CAMNotes:
         except ValueError:
             return False
 
-    def get_meeting_date(self):
+    def get_note_date(self):
         for string in self.prompts:
             if self.contains_date(string):
                 correct_dt = parse(string, fuzzy=True)
@@ -95,7 +95,7 @@ class CAMNotes:
 
     def generate(self):
         try:
-            self.meeting_date = self.get_meeting_date()
+            self.note_date = self.get_note_date()
             self.attendees = self.get_attendees(self.responses[1])
 
             self.description = self.responses[2]
@@ -108,7 +108,9 @@ class CAMNotes:
             for attendee in self.attendees:
                 if len(attendee) > 0:
                     df_data = {'note_id': [self.note_id],
-                               'meeting_date': [self.meeting_date],
+                               'note_date': [self.note_date],
+                               'cam_datetime': [self.cam_datetime],
+                               'action': [self.action],
                                'person_id': [self.person_id],
                                'attendee': [attendee],
                                'description': [self.description],
