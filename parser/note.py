@@ -19,7 +19,7 @@ class CAMNotes:
             self,
             note_id: str,
             comments: str,
-            cam_datetime: date,
+            cam_datetime: datetime,
             action: str,
             person_id: str
     ):
