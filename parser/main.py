@@ -1,9 +1,9 @@
 import pandas as pd
-from strive.note_parser import CAMNotes
+from data_engineering.parser.note_parser import CAMNotes
 from azure.storage.blob import BlockBlobService
 from datetime import datetime
 
-# Define parameters
+# Define blob parameters
 storageAccountName = "devinternalanalyticssa"
 storageKey         = "V0asRZHya4Gutd4jQpmBvtw4l9bDKL5CiJs3c4d7qTtn0AJ60JiVQT4imW/hFNXRQSEYvK+9mKWme+jpIWC5mg=="
 containerName      = "blobstage"
@@ -43,5 +43,7 @@ def parser(input_file: str):
 
 
 if __name__ == '__main__':
-    input_file = r'C:\out\ClientMeetingNotes_test.csv'
+    input_file = r'C:\DATA_ENGINEERING\misc\ClientMeetingNotes_test.csv'
+    test = pd.read_csv(input_file, sep='\t')
+
     df = parser(input_file)
