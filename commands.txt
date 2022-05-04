@@ -1,0 +1,7 @@
+    sf_params = {
+        "account": "gma27020",
+        "region": "us-east-1",
+        "warehouse": "NONPROD_ETL_COMPUTE",
+        "role": "NONPROD_SERVICEACCOUNT",
+        "schema": "LPR",
+    }
