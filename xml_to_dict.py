@@ -35,20 +35,28 @@ def flatten(d):
 
 
 def get_values(qg: Dict, results: List, path_name, sort_num):
-    """
-
-    """
-
     if 'QuestionGroup' in qg.keys():
-        for i, val in enumerate(qg['QuestionGroup']):
-            question_group_id = val['@ID']
-            path_desc = f"{val['@Name']}" if path_name == '' else f"{path_name}, {val['@Name']}"
-            sort_desc = f'{sort_num}{(i + 1):02}'
+        if isinstance(qg['QuestionGroup'], dict):
+            question_group_id = qg['@ID']
+            path_desc = f"{qg['@Name']}" if path_name == '' else f"{path_name}, {qg['@Name']}"
+            sort_desc = f'{sort_num}'
             data = {'QuestionGroupID': question_group_id,
                     'PathDesc': f'{path_desc}',
                     'SortDesc': f'{sort_desc}'}
             results.append(data)
-            get_values(val, results, path_desc, sort_desc)
+            # print(f"Appended to result list: {question_group_id} - {path_desc}")
+
+        if isinstance(qg['QuestionGroup'], list):
+            for i, val in enumerate(qg['QuestionGroup']):
+                question_group_id = val['@ID']
+                path_desc = f"{val['@Name']}" if path_name == '' else f"{path_name}, {val['@Name']}"
+                sort_desc = f'{sort_num}{(i + 1):02}'
+                data = {'QuestionGroupID': question_group_id,
+                        'PathDesc': f'{path_desc}',
+                        'SortDesc': f'{sort_desc}'}
+                results.append(data)
+                # print(f"Appended to result list: {question_group_id} - {path_desc}")
+                get_values(val, results, path_desc, sort_desc)
     return results
 
 
